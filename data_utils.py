@@ -2,6 +2,15 @@ from numpy.random import randn, rand
 import numpy as np
 
 
+def gen_linear_data(c, n):
+    assert n % 2 == 0
+
+    y = np.concatenate([-1 * np.ones((n // 2, 1)), np.ones((n // 2, 1))])
+    X = np.random.randn(n, 2) + c[((y.squeeze() + 3) / 2 - 1).astype("int64")]
+
+    return X, y
+
+
 def gen_sinus_normal_data(n):
     x = randn(n, 1) * 2
     x.sort()
