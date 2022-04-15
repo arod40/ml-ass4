@@ -20,7 +20,7 @@ def gen_sinus_normal_data(n):
     noise = randn(n, 1) * f.std() * 0.5
     y = f + noise
 
-    return np.concatenate([x, y], axis=1)
+    return x, y
 
 
 def gen_sinus_uniform_data(n):
@@ -30,7 +30,7 @@ def gen_sinus_uniform_data(n):
     noise = randn(n, 1) * f.std() * 0.5
     y = f + noise
 
-    return np.concatenate([x, y], axis=1)
+    return x, y
 
 
 def read_digits_data(file: Path):
@@ -45,14 +45,44 @@ def read_digits_data(file: Path):
     return X, y
 
 
+def build_nth_order_features(x, n):
+    return np.concatenate([x ** i for i in range(n + 1)], axis=1)
+
+
 if __name__ == "__main__":
+    import sys
+
     import matplotlib.pyplot as plt
 
     from plot_utils import plot_data
 
-    X, y = read_digits_data(Path("./data/features.train.txt"))
+    item = sys.argv[1]
 
-    _, ax = plt.subplots(1, 1)
+    if item == "digits":
+        X, y = read_digits_data(Path("./data/features.train.txt"))
 
-    plot_data(ax, X, y)
-    plt.show()
+        _, ax = plt.subplots(1, 1)
+
+        plot_data(ax, X, y)
+        plt.show()
+
+    if item == "sinus":
+        N = 50
+        _, ax = plt.subplots(1, 2, figsize=(8, 4))
+        y_ = np.ones((N, 1))
+
+        x, y = gen_sinus_normal_data(N)
+        X = np.concatenate([x, y], axis=1)
+        plot_data(ax[0], X, y_)
+
+        x, y = gen_sinus_uniform_data(N)
+        X = np.concatenate([x, y], axis=1)
+        plot_data(ax[1], X, y_)
+
+        plt.show()
+
+    if item == "poly":
+        N = 5
+        x, y = gen_sinus_normal_data(N)
+        print(x)
+        print(build_nth_order_features(x, 2))

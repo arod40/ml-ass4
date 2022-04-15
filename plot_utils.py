@@ -1,13 +1,25 @@
-import matplotlib.pyplot as plt
+from cProfile import label
+import numpy as np
+from data_utils import build_nth_order_features, gen_sinus_normal_data
 
 
-def plot_data(ax, X, y):
+def plot_polynomial(ax, w, x, label="", color="blue"):
+    n = w.shape[0]
+
+    eval_nth_poly = lambda x, w: (build_nth_order_features(x, n - 1) @ w)
+    y = eval_nth_poly(x, w)
+
+    X = np.concatenate([x, y], axis=1)
+    ax.plot(X[:, 0], X[:, 1], color=color, label=label)
+
+
+def plot_data(ax, X, y, pos_label="positive", neg_label="negative"):
     y_ = y.squeeze()
     ax.set_xlim(X[:, 0].min() - 1, X[:, 0].max() + 1)
     ax.set_ylim(X[:, 1].min() - 1, X[:, 1].max() + 1)
 
-    ax.scatter(X[y_ == 1, 0], X[y_ == 1, 1], marker="o", color="blue")
-    ax.scatter(X[y_ == -1, 0], X[y_ == -1, 1], marker="x", color="red")
+    ax.scatter(X[y_ == 1, 0], X[y_ == 1, 1], marker="o", color="blue", label=pos_label)
+    ax.scatter(X[y_ == -1, 0], X[y_ == -1, 1], marker="x", color="red", label=neg_label)
 
 
 def plot_consistency(axes, X_subset, y_subset, X, y, y1, y2):
