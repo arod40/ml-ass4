@@ -35,6 +35,7 @@ class KNN:
         assert k % 2 == 1, "The value of k must be odd"
         self.k = k
         self.data = None
+        self.condensed_data = None
         self._train_predict = None
 
     @property
@@ -44,11 +45,27 @@ class KNN:
             self._train_predict = self.predict_batch(X)
         return self._train_predict
 
+    @property
+    def is_fit(self):
+        return self.data is not None
+
+    @property
+    def is_condensed(self):
+        return self.condensed_data is not None
+
     def fit(self, X, y):
         self.data = X, y
 
     def predict(self, p, data=None):
-        X, y = data or self.data
+        assert (
+            data is not None or self.is_fit
+        ), "If model is not fit, predict should receive some data"
+
+        X, y = (
+            data
+            or (self.condensed_data if self.is_condensed else None)
+            or (self.data if self.is_fit else None)
+        )
         _, labels, _ = get_k_nearest_neighbors(X, y, p, self.k)
         return 1 if labels.mean() > 0 else -1
 
@@ -58,6 +75,9 @@ class KNN:
         ).reshape((-1, 1))
 
     def condense(self, verbose=False, interactive=False):
+        if verbose:
+            print("Condensing the training data")
+
         X, y = self.data
         N = X.shape[0]
 
@@ -97,8 +117,12 @@ class KNN:
 
             # choose a point to extend S
             rand_inc = choice(range(N - consistent.sum()))
-            x_star = X[~consistent][rand_inc]
-            gD_x_star = self._self_predict[~consistent][rand_inc]
+            x_star = X[~consistent][rand_inc]  # inconsistent point
+            gD_x_star = self._self_predict[~consistent][
+                rand_inc
+            ]  # class of the inconsistent point according to train data
+
+            # get closest neighbor not chosen and with same class
             _, _, idxs = get_k_nearest_neighbors(
                 X,
                 y,
@@ -106,6 +130,8 @@ class KNN:
                 1,
                 subject_to=lambda point, idx: not chosen[idx] and y[idx] == gD_x_star,
             )
+
+            # add that point to S
             chosen[idxs[0]] = True
 
         self.condensed_data = X[chosen], y[chosen]

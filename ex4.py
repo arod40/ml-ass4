@@ -42,15 +42,21 @@ if __name__ == "__main__":
 
     digits_file = Path("./data/features.train.txt")
     X, y = read_digits_data(digits_file)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=500, random_state=random_state
+    )
 
     knn = KNN(3)
+    knn.fit(X_train, y_train)
 
     if item == "b":
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, train_size=500, random_state=random_state
-        )
-        knn.fit(X_train, y_train)
 
+        Ein, Eout = evaluate(
+            knn, X_train, X_test, y_train, y_test, verbose=True, interactive=True
+        )
+
+    if item == "c":
+        knn.condense(verbose=True)
         Ein, Eout = evaluate(
             knn, X_train, X_test, y_train, y_test, verbose=True, interactive=True
         )
