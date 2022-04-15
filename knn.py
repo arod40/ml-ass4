@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import random
 from numpy.random import seed as np_seed
+from tqdm import tqdm
 
 from data_utils import gen_linear_data
 from plot_utils import plot_consistency, plot_data
@@ -51,24 +52,23 @@ class KNN:
         _, labels, _ = get_k_nearest_neighbors(X, y, p, self.k)
         return 1 if labels.mean() > 0 else -1
 
-    def predict_batch(self, P, data=None):
-        return np.array([self.predict(p, data) for p in P]).reshape((-1, 1))
+    def predict_batch(self, P, data=None, show_progress=False):
+        return np.array(
+            [self.predict(p, data) for p in (tqdm(P) if show_progress else P)]
+        ).reshape((-1, 1))
 
     def condense(self, verbose=False, interactive=False):
         X, y = self.data
         N = X.shape[0]
 
         chosen = np.array([False] * N)
-        indexes = np.array(range(N))
 
         # choose k random initial points
-        indexes = sample(range(N), self.k)
-        for idx in indexes:
-            chosen[idx] = True
+        chosen[sample(range(N), self.k)] = True
 
         if interactive:
             plt.ion()
-            fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+            fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 
         # loop until the subset is train consistent
         i = 0
@@ -82,8 +82,9 @@ class KNN:
             i += 1
 
             if interactive:
-                for ax in axes:
-                    ax.clear()
+                for r in axes:
+                    for ax in r:
+                        ax.clear()
                 plot_consistency(
                     axes, X[chosen], y[chosen], X, y, self._self_predict, subset_predict
                 )
@@ -147,5 +148,5 @@ if __name__ == "__main__":
             plt.show()
 
     elif test == "condense":
-        knn.condense(verbose=True, interactive=False)
+        knn.condense(verbose=True, interactive=True)
 
