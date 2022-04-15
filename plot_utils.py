@@ -61,3 +61,13 @@ def plot_train_and_test(
                 max(X_train[:, 1].max(), X_test[:, 1].max()) + 1,
             )
 
+
+def plot_error_bars(ax, results, color, label, move=-1):
+    labels = results.keys()
+    X = np.arange(len(labels))  # the label locations
+    y = [results[key] for key in labels]
+
+    width = 0.25
+    ax.bar(X + move * width / 2, y, width, label=label, color=color)
+    ax.set_xticks(X)
+    ax.set_xticklabels(labels)
