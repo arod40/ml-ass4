@@ -71,3 +71,10 @@ def plot_error_bars(ax, results, color, label, move=-1):
     ax.bar(X + move * width / 2, y, width, label=label, color=color)
     ax.set_xticks(X)
     ax.set_xticklabels(labels)
+
+
+def plot_sparsity(ax, results):
+    for _, weights, color in results:
+        x = range(len(weights))
+        y = abs(weights)
+        ax.plot(x, y, color=color)
