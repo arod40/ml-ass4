@@ -74,6 +74,9 @@ class RBFNetwork:
         X_transform = self._expand_for_bias(self._transform_nonlinear(X))
         return X_transform @ self.weights
 
+    def predict_batch(self, X):
+        return self.predict(X)
+
 
 if __name__ == "__main__":
     x, y = gen_sinus_normal_data(1000)
