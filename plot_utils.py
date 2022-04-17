@@ -1,6 +1,10 @@
 from cProfile import label
 import numpy as np
 from data_utils import build_nth_order_features, gen_sinus_normal_data
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.colors import ListedColormap
+from matplotlib.colorbar import ColorbarBase
+import matplotlib.pyplot as plt
 
 
 def plot_2D_function(ax, f, start, end, label="", color="blue"):
@@ -69,18 +73,34 @@ def plot_train_and_test(
 
 
 def plot_error_bars(ax, results, color, label, move=-1):
-    labels = results.keys()
+    labels = np.array(list(results.keys()))
     X = np.arange(len(labels))  # the label locations
     y = [results[key] for key in labels]
 
     width = 0.25
     ax.bar(X + move * width / 2, y, width, label=label, color=color)
-    ax.set_xticks(X)
-    ax.set_xticklabels(labels)
+
+    xticks = np.linspace(0, len(X) - 1, 10).astype(np.int32)
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(["%.2f" % l for l in labels[xticks]])
 
 
-def plot_sparsity(ax, results):
-    for _, weights, color in results:
-        x = range(len(weights))
+def plot_sparsity(ax, lambdas, weights_list, colors):
+    for weights, color in zip(weights_list, colors):
+        weights = weights[1:]
+        x = range(1, len(weights) + 1)
         y = abs(weights)
         ax.plot(x, y, color=color)
+
+    cmap = ListedColormap(colors, "custom")
+    divider = make_axes_locatable(plt.gca())
+    ax_cb = divider.new_horizontal(size="5%", pad=0.05)
+
+    cb1 = ColorbarBase(ax_cb, cmap=cmap, orientation="vertical", label="lambda")
+    ticks = np.linspace(0, 1, 5)
+    ticks_labels = np.array(lambdas)[
+        np.linspace(0, len(lambdas) - 1, 5).astype(np.int32)
+    ]
+    cb1.set_ticks(ticks)
+    cb1.set_ticklabels(["%.2f" % l for l in ticks_labels])
+    plt.gcf().add_axes(ax_cb)

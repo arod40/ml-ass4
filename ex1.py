@@ -1,18 +1,15 @@
-from matplotlib.colors import rgb_to_hsv
-from plot_utils import plot_data, plot_error_bars, plot_polynomial, plot_sparsity
-from ridge import ridge_regression
-from data_utils import (
-    build_nth_order_features,
-    gen_sinus_uniform_data,
-)
-import numpy as np
-from numpy.random import seed as np_seed
+from cProfile import label
 from random import seed
+
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import to_hex, to_rgb
+from numpy.random import seed as np_seed
 from sklearn.metrics import mean_squared_error
 
-from colorsys import hsv_to_rgb
-from matplotlib.colors import to_rgb, to_hex
+from data_utils import build_nth_order_features, gen_sinus_uniform_data
+from plot_utils import plot_data, plot_error_bars, plot_polynomial, plot_sparsity
+from ridge import ridge_regression
 
 np_seed(8)
 seed(8)
@@ -46,35 +43,29 @@ if __name__ == "__main__":
     X_test = build_nth_order_features(x_test, n)
 
     if item == "2":
-        lamb = 10
-
         _, ax = plt.subplots(1, 1, figsize=(4, 4))
 
         plot_data(
             ax,
-            np.concatenate(
-                [
-                    np.concatenate([x_test, y_test], axis=1),
-                    np.concatenate([x_train, y_train], axis=1),
-                ],
-                axis=0,
-            ),
-            np.concatenate([-np.ones((10 * N, 1)), np.ones((N, 1))], axis=0),
+            np.concatenate([x_train, y_train], axis=1),
+            np.ones((N, 1)),
             pos_label="train data",
-            neg_label="test data",
+            neg_label="",
         )
-
-        w = ridge_regression(X_train, y_train, lamb)
-
         x = np.empty((100, 1))
         x[:, 0] = np.linspace(left, right, 100)
-        plot_polynomial(ax, w, x, label=f"n={n}", color="green")
+
+        w = ridge_regression(X_train, y_train, 10)
+        plot_polynomial(ax, w, x, color="green", label="with regularization")
+
+        w = ridge_regression(X_train, y_train, 0)
+        plot_polynomial(ax, w, x, color="red", label="without regularization")
 
         ax.legend()
         plt.show()
 
     if item == "3":
-        lambdas = [10 ** i for i in range(-5, 5)]
+        lambdas = 10 ** np.linspace(-2, 1.5, 50)
         weights = []
         eins = {}
         eouts = {}
@@ -86,16 +77,21 @@ if __name__ == "__main__":
 
         _, axes = plt.subplots(1, 2, figsize=(8, 4))
 
+        # Plot error as function of lambda
         plot_error_bars(axes[0], eouts, "blue", "Eout", move=0)
         plot_error_bars(axes[0], eins, "red", "Ein", move=0)
 
         axes[0].legend()
         axes[0].set_xlabel("lambda")
-        axes[0].set_ylabel("mean square error")
+        axes[0].set_ylabel("mean squared error")
 
-        colors = [color_gradient("orange", "red", x / n) for x in range(n)]
+        # Plot scarcity
+        colors = [
+            color_gradient("orange", "red", x / len(lambdas))
+            for x in range(len(lambdas))
+        ]
         plot_sparsity(
-            axes[1], zip(lambdas, weights, colors),
+            axes[1], lambdas, weights, colors,
         )
 
         axes[1].set_xlabel("weight")
