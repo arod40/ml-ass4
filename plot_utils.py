@@ -4,7 +4,7 @@ from data_utils import build_nth_order_features, gen_sinus_normal_data
 
 
 def plot_2D_function(ax, f, start, end, label="", color="blue"):
-    x = np.linspace(start, end, 100)
+    x = np.linspace(start, end, 1000)
     y = [f(xi) for xi in x]
     ax.plot(x, y, color=color, label=label)
 
