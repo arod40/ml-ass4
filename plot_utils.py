@@ -3,6 +3,12 @@ import numpy as np
 from data_utils import build_nth_order_features, gen_sinus_normal_data
 
 
+def plot_2D_function(ax, f, start, end, label="", color="blue"):
+    x = np.linspace(start, end, 100)
+    y = [f(xi) for xi in x]
+    ax.plot(x, y, color=color, label=label)
+
+
 def plot_polynomial(ax, w, x, label="", color="blue"):
     n = w.shape[0]
 
