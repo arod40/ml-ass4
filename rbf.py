@@ -1,13 +1,18 @@
 from math import e
+from random import seed
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.random import seed as np_seed
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 
-from data_utils import gen_sinus_normal_data
+from data_utils import gen_sinus_normal_data, gen_sinus_uniform_data
 from knn import euclidean_distance
 from plot_utils import plot_2D_function, plot_data
+
+np_seed(8)
+seed(8)
 
 
 def gaussian_kernel(x):
@@ -79,7 +84,7 @@ class RBFNetwork:
 
 
 if __name__ == "__main__":
-    x, y = gen_sinus_normal_data(1000)
+    x, y = gen_sinus_uniform_data(20)
 
     npRBF = NonParametricRBF(gaussian_kernel, 0.3)
     npRBF.fit(x, y)

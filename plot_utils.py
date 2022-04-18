@@ -1,10 +1,18 @@
-from cProfile import label
-import numpy as np
-from data_utils import build_nth_order_features, gen_sinus_normal_data
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib.colors import ListedColormap
-from matplotlib.colorbar import ColorbarBase
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colorbar import ColorbarBase
+from matplotlib.colors import ListedColormap, to_hex, to_rgb
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+from data_utils import build_nth_order_features, gen_sinus_normal_data
+
+
+def color_gradient(
+    c1, c2, mix=0
+):  # fade (linear interpolate) from color c1 (at mix=0) to c2 (mix=1)
+    c1 = np.array(to_rgb(c1))
+    c2 = np.array(to_rgb(c2))
+    return to_hex((1 - mix) * c1 + mix * c2)
 
 
 def plot_2D_function(ax, f, start, end, label="", color="blue"):
@@ -101,6 +109,25 @@ def plot_sparsity(ax, lambdas, weights_list, colors):
     ticks_labels = np.array(lambdas)[
         np.linspace(0, len(lambdas) - 1, 5).astype(np.int32)
     ]
+    cb1.set_ticks(ticks)
+    cb1.set_ticklabels(["%.2f" % l for l in ticks_labels])
+    plt.gcf().add_axes(ax_cb)
+
+
+def plot_functions_colors(ax, values, label, functions, colors, start, end):
+    for f, color in zip(functions, colors):
+        plot_2D_function(ax, f, start, end, color=color)
+
+    ax.set_xlabel("x")
+    ax.set_xlabel("y")
+
+    cmap = ListedColormap(colors, "custom")
+    divider = make_axes_locatable(plt.gca())
+    ax_cb = divider.new_horizontal(size="5%", pad=0.05)
+
+    cb1 = ColorbarBase(ax_cb, cmap=cmap, orientation="vertical", label=label)
+    ticks = np.linspace(0, 1, 5)
+    ticks_labels = np.array(values)[np.linspace(0, len(values) - 1, 5).astype(np.int32)]
     cb1.set_ticks(ticks)
     cb1.set_ticklabels(["%.2f" % l for l in ticks_labels])
     plt.gcf().add_axes(ax_cb)

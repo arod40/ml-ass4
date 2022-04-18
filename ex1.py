@@ -1,14 +1,22 @@
-from cProfile import label
 from random import seed
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import to_hex, to_rgb
 from numpy.random import seed as np_seed
 from sklearn.metrics import mean_squared_error
 
-from data_utils import build_nth_order_features, gen_sinus_uniform_data
-from plot_utils import plot_data, plot_error_bars, plot_polynomial, plot_sparsity
+from data_utils import (
+    build_nth_order_features,
+    gen_sinus_normal_data,
+    gen_sinus_uniform_data,
+)
+from plot_utils import (
+    color_gradient,
+    plot_data,
+    plot_error_bars,
+    plot_polynomial,
+    plot_sparsity,
+)
 from ridge import ridge_regression
 
 np_seed(8)
@@ -18,14 +26,6 @@ seed(8)
 def evaluate_weights(X, y, w):
     y_predicted = X @ w
     return mean_squared_error(y, y_predicted)
-
-
-def color_gradient(
-    c1, c2, mix=0
-):  # fade (linear interpolate) from color c1 (at mix=0) to c2 (mix=1)
-    c1 = np.array(to_rgb(c1))
-    c2 = np.array(to_rgb(c2))
-    return to_hex((1 - mix) * c1 + mix * c2)
 
 
 if __name__ == "__main__":
