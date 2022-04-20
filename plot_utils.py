@@ -36,8 +36,12 @@ def plot_data(ax, X, y, pos_label="positive", neg_label="negative"):
     ax.set_xlim(X[:, 0].min() - 1, X[:, 0].max() + 1)
     ax.set_ylim(X[:, 1].min() - 1, X[:, 1].max() + 1)
 
-    ax.scatter(X[y_ == 1, 0], X[y_ == 1, 1], marker="o", color="blue", label=pos_label)
-    ax.scatter(X[y_ == -1, 0], X[y_ == -1, 1], marker="x", color="red", label=neg_label)
+    ax.scatter(
+        X[y_ == 1, 0], X[y_ == 1, 1], marker="o", color="blue", label=pos_label,
+    )
+    ax.scatter(
+        X[y_ == -1, 0], X[y_ == -1, 1], marker="x", color="red", label=neg_label,
+    )
 
 
 def plot_consistency(axes, X_subset, y_subset, X, y, y1, y2):

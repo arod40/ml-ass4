@@ -42,6 +42,23 @@ if __name__ == "__main__":
     X_train = build_nth_order_features(x_train, n)
     X_test = build_nth_order_features(x_test, n)
 
+    if item == "data":
+        _, ax = plt.subplots(1, 1, figsize=(4, 4))
+        plot_data(
+            ax,
+            np.concatenate(
+                [
+                    np.concatenate([x_test, y_test], axis=1),
+                    np.concatenate([x_train, y_train], axis=1),
+                ],
+            ),
+            np.concatenate([-np.ones((10 * N, 1)), np.ones((N, 1))]),
+            pos_label="train data",
+            neg_label="test data",
+        )
+        plt.legend()
+        plt.show()
+
     if item == "2":
         _, ax = plt.subplots(1, 1, figsize=(4, 4))
 
@@ -57,9 +74,15 @@ if __name__ == "__main__":
 
         w = ridge_regression(X_train, y_train, 10)
         plot_polynomial(ax, w, x, color="green", label="with regularization")
+        ein = evaluate_weights(X_train, y_train, w)
+        eout = evaluate_weights(X_test, y_test, w)
+        print("Ein:", ein, "Eout", eout)
 
         w = ridge_regression(X_train, y_train, 0)
         plot_polynomial(ax, w, x, color="red", label="without regularization")
+        ein = evaluate_weights(X_train, y_train, w)
+        eout = evaluate_weights(X_test, y_test, w)
+        print("Ein:", ein, "Eout", eout)
 
         ax.legend()
         plt.show()

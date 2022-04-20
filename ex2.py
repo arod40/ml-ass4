@@ -1,3 +1,4 @@
+from more_itertools import sample
 import numpy as np
 from numpy.random import seed as np_seed
 from random import seed
@@ -41,6 +42,7 @@ def experiment(X_train, y_train, X_test, y_test, parametric, r, k=None):
 
 
 def vary_radius(values_of_r, parametric, k, x_train, y_train, x_test, y_test):
+    N = len(x_train)
     colors = [
         color_gradient("orange", "red", x / len(values_of_r))
         for x in range(len(values_of_r))
@@ -84,6 +86,7 @@ def vary_radius(values_of_r, parametric, k, x_train, y_train, x_test, y_test):
 
 
 def vary_centers(values_of_k, r, x_train, y_train, x_test, y_test):
+    N = len(x_train)
     colors = [
         color_gradient("orange", "red", x / len(values_of_k))
         for x in range(len(values_of_k))
@@ -110,6 +113,59 @@ def vary_centers(values_of_k, r, x_train, y_train, x_test, y_test):
         axes[1],
         values_of_k,
         "number of centers",
+        functions,
+        colors,
+        min(x_train.min(), x_test.min()),
+        max(x_train.max(), x_test.max()),
+    )
+
+    plot_data(
+        axes[1],
+        np.concatenate([x_train, y_train], axis=1),
+        np.ones((N, 1)),
+        pos_label="train data",
+        neg_label="",
+    )
+    plt.show()
+
+
+def vary_both(values_of_k, values_of_r, x_train, y_train, x_test, y_test):
+    N = len(x_train)
+    n = len(values_of_k) * len(values_of_r)
+    colors = [color_gradient("orange", "red", x / n) for x in range(n)]
+
+    R = x_train.max() - x_train.min()
+
+    eins = []
+    eouts = []
+    functions = []
+    for k in values_of_k:
+        for r in values_of_r:
+            ein, eout, f = experiment(x_train, y_train, x_test, y_test, True, r, k)
+            value = abs(R / k - r)
+            eins.append((value, ein))
+            eouts.append((value, eout))
+            functions.append((value, f))
+
+    eins.sort()
+    eouts.sort()
+    functions.sort()
+
+    _, axes = plt.subplots(1, 2, figsize=(8, 4))
+
+    plot_error_bars(axes[0], dict(eouts), "blue", "Eout", move=0)
+    plot_error_bars(axes[0], dict(eins), "red", "Ein", move=0)
+    axes[0].set_ylim(0, 0.040)
+    axes[0].set_xlabel("|R/k-r|")
+    axes[0].set_ylabel("mean squared error")
+    axes[0].legend()
+
+    values = [v for v, _ in functions]
+    functions = [f for _, f in functions]
+    plot_functions_colors(
+        axes[1],
+        values,
+        "|R/k-r|",
         functions,
         colors,
         min(x_train.min(), x_test.min()),
@@ -185,3 +241,9 @@ if __name__ == "__main__":
         values_of_k = np.array(range(1, 11))
 
         vary_centers(values_of_k, r, x_train, y_train, x_test, y_test)
+
+    if item == "both":
+        values_of_r = np.linspace(0.1, 1, 30)
+        values_of_k = np.array(range(1, 11))
+
+        vary_both(values_of_k, values_of_r, x_train, y_train, x_test, y_test)
